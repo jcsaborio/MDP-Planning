@@ -61,7 +61,7 @@ namespace PARSER{
         if(goalC == 0) goalC = mazeParams.cols - 1;
         if(goalR == 0) goalR = mazeParams.rows - 1;
         
-        mazeParams.goal = new State(goalC, goalR);
+        mazeParams.goal = new State(goalR, goalC);
         
         cout << "Parsed Maze: " << mazeParams.rows << "x" << mazeParams.cols << ", " 
              << mazeParams.traps << " traps, " << "p(traps) = " << mazeParams.p_traps 
