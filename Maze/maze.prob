@@ -5,4 +5,4 @@ p_traps 0.5
 goalR 3
 goalC 3
 discount 0.95
-error 1e-15
+error 1e-8
