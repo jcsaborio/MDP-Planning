@@ -1,0 +1,9 @@
+Objective: understand the value iteration algorithm by changing planning and problem values.
+
+Syntax: $maze problemfile
+
+The default behavior is to parse/read a maze description file, display the maze and then perform value iteration until the maximum update error is satisfied.  The resulting (best) policy is then displayed.
+
+1) The problem file Maze/maze.prob describes a maze with traps.  Try changing the value of p_traps (probability of getting trapped) and the error (used as convergence criteria) and see what happens.
+
+2) The file src/maze.h describes the underlying MDP and contains, among other things, the problem's reward distribution.  Try changing these values, particularly the rewards for steps and traps and see how the policy changes.  If there isn't much punishment, getting trapped may not seem so bad.  Likewise, if steps are not punished, an agent may be willing to take longer paths.
