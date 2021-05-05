@@ -56,7 +56,7 @@ void VI::Plan(double error){
             //For every action: get the successor states, their rewards and their probabilities
             for(auto a : actions){
                 
-                maze->expandMDP(s, actions[a], nextStates, reward, probability);
+                maze->expandMDP(s, a, nextStates, reward, probability);
                 
                 //Sum over s' of p(s')[r + gamma*V(s')]
                 sum_s_p = 0;
@@ -159,7 +159,7 @@ void VI::DisplayPolicy(std::ostream& ostr){
     for(State& s : states){            
         maze->getActions(s, actions);
         for(auto a : actions){
-            maze->expandMDP(s, actions[a], nextStates, reward, probability);
+            maze->expandMDP(s, a, nextStates, reward, probability);
             sum_s_p = 0;
             for(int s_p=0; s_p < nextStates.size(); s_p++){
                 sum_s_p += probability[s_p] * (reward[s_p] + PlanParams.discount*getValue(nextStates[s_p]) );
