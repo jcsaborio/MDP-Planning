@@ -13,8 +13,11 @@ Maze::Maze(PARAMS& params){
     InitMaze();
 }
 
+/*
+ * Initialize maze using given parameters
+ */
 void Maze::InitMaze(){
-    //Set up empty grid
+    //Set up grid tiles
     grid = new char*[rows];
     for(int i=0; i < rows; i++){
         grid[i] = new char[cols];
@@ -39,9 +42,9 @@ void Maze::InitMaze(){
 }
 
 /*
-    Expand an MDP state-action transition and list all resulting states, rewards and probabilities.
-    
-    The vectors are all of equal length and for each of them, position i corresponds to successor state i.
+ * Expand an MDP state-action transition and list all resulting states, rewards and probabilities
+ * 
+ * The vectors are all of equal length and for each of them, position i corresponds to successor state i.
  */
 void Maze::expandMDP(const State& origin, int action, vector<State>& nextStatesV, vector<double>& rewardV, vector<float>& probabilityV) const{
     //Assume transition is deterministic
@@ -109,7 +112,9 @@ void Maze::expandMDP(const State& origin, int action, vector<State>& nextStatesV
     rewardV.push_back(reward);
 }
 
-//List all MDP states
+/* 
+ * List all MDP states, which in this case corresponds to every row,col pair
+ */
 void Maze::listStates(vector<State>& states) const{
     for(int i=0; i < rows; i++){
         for(int j=0; j < cols; j++){
@@ -118,30 +123,32 @@ void Maze::listStates(vector<State>& states) const{
     }
 }
 
-//In this problem, all states have the same actions
+/* 
+ * Return all actions available in state s.
+ * 
+ * In this problem, all states have the same actions.
+ */
 void Maze::getActions(State& s, vector<int>& actions) const{
     for(int i=0; i < nActions; i++)
         actions.push_back(i);
 }
 
-/*** MDP Simulator ***/
-bool Maze::Step(State& s, int action, double& reward, float& probability) const{
+/* 
+ * MDP Simulator
+ * 
+ * Simulate the transition from state s and action a
+ */
+bool Maze::Step(State& s, int action, double& reward) const{
     //Assume transition is not terminal
-    bool terminal = false;
-    
-    //Assume transition is deterministic
-    probability = 1.0;
+    bool terminal = false;        
     
     //Find out if agent landed on a trap
-    if(grid[s.row][s.col] == trap){
-        
-        probability = p_traps; //This is a probabilistic transition!
-        
+    if(grid[s.row][s.col] == trap){        
         //Simulate trap.  If true, agent remains trapped and cannot execute action.
         if(Bernoulli(p_traps)){
             reward = rTrap;
             return false; //Non-terminal state
-        }      
+        }
     }
     
     //Execute action if it is valid, and assign rewards
@@ -194,7 +201,7 @@ bool Maze::Step(State& s, int action, double& reward, float& probability) const{
 }
 
 /*
-    Simulate a Bernoulli trial with a given probability
+ * Simulate a Bernoulli trial with a given probability
  */
 bool Maze::Bernoulli(double p) const{
     return rand() < p * RAND_MAX;
@@ -203,7 +210,7 @@ bool Maze::Bernoulli(double p) const{
 /*** Output functions ***/
 
 /*
-    Display a complete state including the grid and the agent
+ * Display a complete state including the grid and the agent
  */
 void Maze::DisplayState(const State& state, std::ostream& ostr) const{
     for(int i=0; i < rows; i++){
@@ -220,7 +227,7 @@ void Maze::DisplayState(const State& state, std::ostream& ostr) const{
 }
 
 /*
-    Display a character for each numerical action
+ * Display a character for each numerical action
  */
 void Maze::DisplayAction(int action, std::ostream& ostr) const{
     switch(action){

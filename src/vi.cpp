@@ -6,31 +6,27 @@ using std::endl;
 VI::VI(VI_PARAMS& params, Maze * maze){
     PlanParams.discount = params.discount;
     PlanParams.error = params.error;
-    this->maze = maze;    
+    this->maze = maze;
     numActions = maze->getNumActions();    
-    int rows = maze->getRows();
-    int cols = maze->getCols();
-    numStates = rows*cols;
+    numStates = maze->getRows()*maze->getCols();
     
     V = new double[numStates];
     for(int i=0; i < numStates; i++) V[i] = 0.0;
 }
 
 /*
-    Perform value iteration using the error specified as a parameter
+ * Perform value iteration using the error specified as a parameter
  */
 void VI::Plan(){
     Plan(PlanParams.error);
 }
 
 /*
-    Perform value iteration using any given error
+ * Perform value iteration with given error
  */
 void VI::Plan(double error){    
     double previousV;
-    double delta = 0.0;
-    int rows = maze->getRows();
-    int cols = maze->getCols();
+    double delta = 0.0;    
     vector<double> outcomes;
     double sum_s_p;
 
@@ -40,7 +36,7 @@ void VI::Plan(double error){
     vector<double> reward;
     vector<float> probability;
     
-    int iter = 0;
+    int iter = 0; //Count number of iterations until convergence
 
     //First get all MDP states
     maze->listStates(states);
@@ -101,7 +97,7 @@ void VI::setValue(const State& s, double v){
 }
 
 /*
-    Return the element with maximal value
+ * Return the vector element with maximal value
  */
 int VI::arg_max(vector<double> values){
     double best_v = -Infinity;
@@ -118,44 +114,42 @@ int VI::arg_max(vector<double> values){
 }
 
 /*
-    Return the maximal value
+ * Return the maximal value
  */
 double VI::max(vector<double> values){
     double best_v = -Infinity;
     double value = 0;
     
-    for(int i=0; i < values.size(); i++){        
-        if(values[i] > best_v){
-            best_v = values[i];
+    for(auto v : values){
+        if(v > best_v){
+            best_v = v;
         }
     }
     return best_v;
 }
 
 /*
-    Extract the optimal policy computed by value iteration, by simply displaying for each state the action with maximal value
+ * Extract the optimal policy computed by value iteration, by simply displaying for each state the action with maximal value
  */
 void VI::DisplayPolicy(){
     DisplayPolicy(cout);
 }
 
-void VI::DisplayPolicy(std::ostream& ostr){
-    int rows = maze->getRows();
-    int cols = maze->getCols();
-    int best_a;
-        
+void VI::DisplayPolicy(std::ostream& ostr){          
     vector<double> outcomes;
     double sum_s_p;
+    int best_a;
 
-    vector<int> actions;    
+    vector<State> states;
+    vector<int> actions;
     vector<State> nextStates;
     vector<double> reward;
     vector<float> probability;
     
-    vector<State> states;
+    int cols = maze->getCols();
+    
+    //Iterate one last time over all states to look for the best valued action
     maze->listStates(states);
-
-    //Iterate one last time to look for the best valued action
     for(State& s : states){            
         maze->getActions(s, actions);
         for(auto a : actions){
@@ -183,7 +177,7 @@ void VI::DisplayPolicy(std::ostream& ostr){
         actions.clear();
         
         //New line when row ends
-        if(s.col == cols-1) cout << endl;
+        if(s.col == cols-1) ostr << endl;
     }
     
 }

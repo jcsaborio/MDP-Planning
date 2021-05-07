@@ -1,8 +1,8 @@
 /*
-    VI:
-    by Juan Carlos Saborio, DFKI Labor Niedersachsen (2021)
-    
-    VI implements a straightforward version of the value iteration algorithm.
+ * VI:
+ * by Juan Carlos Saborio, DFKI Labor Niedersachsen (2021)
+ * 
+ * VI implements a straightforward version of the value iteration algorithm.
  */
 
 #ifndef VI_H
@@ -23,7 +23,7 @@ using std::cout;
 using std::endl;
 
 /*
-    Planning parameters
+ * Planning parameters
  */
 struct VI_PARAMS{
     //State* startstate;  //Not generally used in VI

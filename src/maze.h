@@ -1,12 +1,10 @@
 /*
-    Maze:
-    by Juan Carlos Saborio, DFKI Labor Niedersachsen (2021)
-    
-    This is a simple maze navigation problem implemented as an MDP.
-    
-    - The step function simulates the transition s' <- (s,a) and returns the associated reward R(s,a,s') and probability.  This function may be used with sampling-based planning, e.g. UCT.
-    
-    - The expandMDP function returns all resulting states, rewards and probabilities for a given pair (s,a) and may be used for full-width planners such as VI and PI.
+ * Maze:
+ * by Juan Carlos Saborio, DFKI Labor Niedersachsen (2021)
+ * This is a simple maze navigation problem implemented as an MDP.
+ * 
+ * - The step function simulates the transition s' <- (s,a) and returns the associated reward R(s,a,s') and probability.  This function may be used with sampling-based planning, e.g. UCT.
+ * - The expandMDP function returns all resulting states, rewards and probabilities for a given pair (s,a) and may be used for full-width planners such as VI and PI.
  */
 
 
@@ -22,7 +20,7 @@
 using std::vector;
 
 /*
-    The state contains only the agent's location.  The grid is persistent so it is part of the maze itself.
+ * The state contains only the agent's location.  The grid is persistent so it is part of the maze itself.
  */
 struct State{
     int row;
@@ -34,7 +32,7 @@ struct State{
 };
 
 /*
-    Maze parameters
+ * Maze parameters
  */
 struct PARAMS{                   
     int cols; //No. of columns
@@ -45,28 +43,32 @@ struct PARAMS{
 };
 
 /*
-    MDP definition
+ * MDP definition
  */
 class Maze{
     private:
-        int cols, rows;
-        int traps;
-        float p_traps;
-        float discount;
-        State* startstate;
-        State* goalstate;
+        int cols, rows; //Grid size
+        int traps; //No. of traps
+        float p_traps; //Prob. of getting trapped
+        float discount; //Discount factor
+        State* goalstate; //Location of the goal
         char ** grid;
         void InitMaze();
-        void updateGrid(State* s);
         bool Bernoulli(double p) const; //Simulate the outcome of a Bernoulli trial with probability p
         
     public:
         Maze(PARAMS& mazeParams);
-        bool Step(State& s, int action, double& reward, float& probability) const; //Step function for generative planning
+        bool Step(State& s, int action, double& reward) const; //Step function for generative planning
         
+        /*
+         * These functions are used for full-width planning (e.g. VI/PI).
+         */
         void listStates(vector<State>& states) const; //List all states in this MDP
         void expandMDP(const State& origin, int action, vector<State>& nextStatesV, vector<double>& rewardV, vector<float>& probabilityV) const; //Generate all successors, rewards and their probabilities for a given state-action pair
         
+        /*
+         * Utility functions
+         */
         int getRows() const { return rows; }
         int getCols() const { return cols; }
         int getNumStates() const { return rows*cols; }
@@ -76,12 +78,17 @@ class Maze{
         
         void getActions(State& s, vector<int>& actions) const; //Get all actions available in state s
         
+        /*
+         * Output
+         */
         void DisplayState(const State& state, std::ostream& ostr) const;
         void DisplayAction(int action, std::ostream& ostr) const;
         
     
     protected:        
-        //Reward distribution (change if desired):
+        /*
+         * Reward distribution (change if desired):
+         */
         int rStep = -1;
         int rOut = -10;
         int rTrap = -5;
