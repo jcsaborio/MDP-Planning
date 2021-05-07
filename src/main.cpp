@@ -1,7 +1,7 @@
 /*
-    Launcher for the VI algorithm using the Maze problem.
-    
-    by Juan Carlos Saborio, DFKI Labor Niedersachsen (2021).
+ * Launcher for the VI algorithm using the Maze problem.
+ * 
+ * by Juan Carlos Saborio, DFKI Labor Niedersachsen (2021).
  */
 #include <iostream>
 #include <cstring>
