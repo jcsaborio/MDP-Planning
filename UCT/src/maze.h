@@ -83,6 +83,7 @@ class Maze{
         bool validateState(const State& s) const { return (s.row >=0 && s.row < rows && s.col >= 0 && s.col < cols); }
         
         void getActions(State& s, vector<int>& actions) const; //Get all actions available in state s
+        void getLegalActions(State& s, vector<int>& actions) const; //List only valid actions in state s
         
         /*
          * Output

@@ -133,6 +133,13 @@ void Maze::getActions(State& s, vector<int>& actions) const{
         actions.push_back(i);
 }
 
+void Maze::getLegalActions(State& s, vector<int>& actions) const{
+    if(s.row > 0) actions.push_back(UP);
+    if(s.row < rows-1) actions.push_back(DOWN);
+    if(s.col > 0) actions.push_back(LEFT);
+    if(s.col < cols-1) actions.push_back(RIGHT);
+}
+
 /* 
  * MDP Simulator
  * 
@@ -202,7 +209,7 @@ bool Maze::Step(State& s, int action, double& reward) const{
 
 int Maze::SelectRandom(State& s) const{
     vector<int> actions;
-    getActions(s, actions);
+    getLegalActions(s, actions);
     
     int action = rand() % actions.size(); //Uniformly random action
     actions.clear();

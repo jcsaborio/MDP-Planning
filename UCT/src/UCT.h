@@ -1,5 +1,9 @@
 /* UCT
  * 
+ * Simple UCT implementation
+ * by Juan Carlos Saborio,
+ * DFKI Labor Niedersachsen (2021)
+ * 
  */
 
 #ifndef UCT_H
@@ -13,23 +17,29 @@
 #include <cmath>
 #include <cstring>
 #include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <chrono>
 #include "maze.h"
 
 using std::vector;
 using std::cout;
 using std::endl;
 
+/*
+ * Node defines both the contents of the MCTS tree nodes as well as the tree structure itself
+ */
 class Node{
     private:
-        vector<int> actions;
-        vector<int> actionCount;
-        vector< vector<Node*> *> successors;
-        vector<double> reward;
-        int count;
-        State* s;
+        vector<int> actions; //List of actions
+        vector<int> actionCount; //No. of times each action has been executed
+        vector< vector<Node*> *> successors; //Somewhat convoluted way to maintain a successor map/matrix.  Each action has multiple successors.
+        vector<double> reward; //List of rewards for each action
+        int count; //Times the node has been visited
+        State* s; //The MDP state in this tree node
 
     public:
-        Node(State* s, vector<int> actions);
+        Node(const State& s, vector<int> actions);
         ~Node();
         
         int getAction(int a);
@@ -38,34 +48,38 @@ class Node{
         void increaseActionCount(int a);
         int getActionCount(int a);
         
-        double getValue(int a);
-        void addReward(int a, double r);
+        double getValue(int a); //Compute Q(s,a)
+        void addReward(int a, double r); //Update the sum of rewards to compute Q
         
         State& getState();
-        //vector<Node*> getSuccessors();
+        vector< vector<Node*> *> * getSuccessorsVector();
         void setSuccessors(vector< vector<Node*> *> succesors);
         Node* getSuccessor(int action, State& s);
+        void freeSuccessor(int action, State& s);
+        bool expanded();
 };
 
-struct UCT_PARAMS{    
-    //Search params
-    int discount;
-    double exploration;
+//Search params
+struct UCT_PARAMS{
+    double discount;
+    double exploration = 20;
     int depth;
     State* startstate;
     State* goalstate;
 };
 
+//Experiment params
 struct EXP_PARAMS{
-    //Experiment params
     int minSims;
     int maxSims;
     int sims;
     int numSteps;
     int numRuns;
     std::string outputFile;
+    int verbose = 1;
 };
 
+//Store experiment results
 struct RESULTS{
     vector<double> time;
     vector<double> reward;
@@ -85,27 +99,29 @@ inline void RESULTS::clear()
 
 class UCT{
     private:
-        Node * Root;
+        Node * Root; //The root of the MCTS tree
         UCT_PARAMS searchParams;
         EXP_PARAMS expParams;
         RESULTS results;
-        Maze * MDP;
-        
-        //vector< vector<Node*> *> expandNode(Node * n);
-        void expandNode(Node * n);
+        Maze * MDP; //The planning domain
+                
+        void expandNode(Node * n); //Create node successors
     
     public:
         UCT(UCT_PARAMS& searchParams, EXP_PARAMS& expParams, Maze * maze);
         ~UCT();
         
-        int Search(Node * n, int nsims);
-        int UCB(Node * n, bool greedy = false);        
-        double Simulate(State& s, Node * n, int depth);
-        double Rollout(State& s, int depth);
+        int Search(Node * n, int nsims); //Plan with UCT from node n, using nsims simulations
+        int UCB(Node * n, bool greedy = false); //UCB action selection
+        double Simulate(State& s, Node * n, int depth); //MCTS simulation
+        double Rollout(State& s, int depth); //MCTS Rollout
         
-        void Run();
-        void MultiRun();
-        void Experiment();
+        /*
+         * Execution and testing functions
+         */
+        void Run(); //Run a single instance according to expParams
+        void MultiRun(); //Run several instances according to expParams
+        void Experiment(); //Coordinate and generate output for multiple instances according to expParams
 };
 
 #endif

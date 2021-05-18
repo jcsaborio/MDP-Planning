@@ -30,6 +30,7 @@ namespace PARSER{
         int maxSims = 16;
         int numSteps = 50;
         int runs = 1;
+        int verbose = 1;
     };
     
     void parseCommandLine(char ** argv, int argc, COMMAND_LINE& cl){        
@@ -60,11 +61,15 @@ namespace PARSER{
                 
                 cout << std::setw(3) << "";
                 cout << std::left << std::setw(20) << "--numSteps";
-                cout << std::left << std::setw(100) << "Max. steps before termination" << endl;                
+                cout << std::left << std::setw(100) << "Max. steps before termination" << endl;
                 
                 cout << std::setw(3) << "";
                 cout << std::left << std::setw(20) << "--runs";
-                cout << std::left << std::setw(100) << "No. of episodes" << endl;                
+                cout << std::left << std::setw(100) << "No. of episodes" << endl;
+                
+                cout << std::setw(3) << "";
+                cout << std::left << std::setw(20) << "--verbose";
+                cout << std::left << std::setw(100) << "Verbosity level (default = 1)" << endl;      
                 
                 exit(0);
             }
@@ -81,6 +86,8 @@ namespace PARSER{
                 cl.numSteps = stoi(value);
             else if(param == "--runs")
                 cl.runs = stoi(value);
+            else if(param == "--verbose")
+                cl.verbose = stoi(value);
             else
                 cout << "Unrecognized parameter \"" << param << "\"" << endl;
         }

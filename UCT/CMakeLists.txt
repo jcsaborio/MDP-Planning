@@ -6,6 +6,7 @@ src/maze.cpp
 src/UCT.cpp
 src/mainUCT.cpp
 src/ParserUCT.h
+src/Statistic.h
 )
 
 set(CMAKE_CXX_FLAGS "-O3")
