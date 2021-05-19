@@ -39,12 +39,19 @@ int main(int argc, char ** argv){
     cout << "Maze: " << endl;
     M->DisplayState(*uctParams.startstate, cout);
     
-    //Create UCT
+    //Create UCT (planner)
     UCT uct(uctParams, expParams, M);
     
-    //Run UCT with specified parameters
-    uct.Experiment();
+    /* Run UCT with specified parameters
+     * Solve() generates and prints a deterministic policy (not useful in larger problems)
+     * Experiment() runs UCT online several times following the conditions in expParameters, and generates an output file.
+     */
+    if(cl.solve)
+        uct.Solve();
+    else
+        uct.Experiment();
     
+    delete M;
     
     return 0;
 }

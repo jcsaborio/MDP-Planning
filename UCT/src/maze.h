@@ -90,6 +90,7 @@ class Maze{
          */
         void DisplayState(const State& state, std::ostream& ostr) const;
         void DisplayAction(int action, std::ostream& ostr) const;
+        void DisplayPolicy(const vector<State>& states, const vector<int>& actions, std::ostream& ostr) const;
         
     
     protected:        

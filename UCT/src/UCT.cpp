@@ -35,8 +35,8 @@ void Node::setSuccessors(vector< vector<Node*> *> successors){
 
 void Node::freeSuccessor(int action, State& s){    
     assert(action >= 0 && action < successors.size());    
-
-    for(Node* n_ : *(successors[action])){
+    vector<Node *> sucs = *(successors[action]);
+    for(Node* n_ : sucs){
         if(s.equals(n_->getState())){
             n_ = NULL; //free pointer
         }
@@ -127,10 +127,6 @@ UCT::UCT(UCT_PARAMS& searchParams, EXP_PARAMS& expParams, Maze * maze){
     this->MDP = maze;    
 }
 
-UCT::~UCT(){
-    
-}
-
 /*
  * UCB1 action selection rule
  * greedy = true uses no exploration bias, for example to select an action after planning
@@ -143,16 +139,16 @@ int UCT::UCB(Node * n, bool greedy){
        
     for(auto a : actions){
         double q = n->getValue(a);
-       
+        
         if(!greedy){
             int N_ = n->getCount();
             int n_ = n->getActionCount(a);
             if(n_ == 0)
-                q += Infinity;
+                q += Infinity; //Prefer untried actions
             else
                 q += searchParams.exploration * std::sqrt(std::log(N_ + 1) / n_);
         }
-        
+                
         if (q >= bestQ){
             if (q > bestQ) bestA.clear();
             bestQ = q;
@@ -160,9 +156,9 @@ int UCT::UCB(Node * n, bool greedy){
         }
 
     }
-        
+
     int best = rand() % bestA.size();
-    
+
     int action = bestA[best];
     bestA.clear();
     actions.clear();
@@ -176,8 +172,9 @@ int UCT::UCB(Node * n, bool greedy){
 int UCT::Search(Node * n, int nsims){
         
     State s(n->getState());
+    double r;
     for(int i=0; i < nsims; i++){        
-        double r = Simulate(s, n, searchParams.depth);
+        r = Simulate(s, n, searchParams.depth);
         s.copy(n->getState());
     }
     
@@ -196,15 +193,15 @@ double UCT::Simulate(State& s, Node* n, int depth){
     bool terminal = false;
     int action;
     
-    action = UCB(n);
+    action = UCB(n); //Get action using UCB.  Untried actions are preferred through exploration bias.
     terminal = MDP->Step(s, action, reward); //Simulate step with given action
-
-    if(!n->expanded()){            
+    
+    if(!n->expanded()){        
         expandNode(n); //Newly visited nodes get all successors added at once
     }
     
     if(!terminal){        
-        Node* next = n->getSuccessor(action, s); //Get node ptr to resulting state        
+        Node* next = n->getSuccessor(action, s); //Get node ptr to resulting state               
         
         //If node has not been visited
         if(next->getCount() == 0){            
@@ -326,16 +323,13 @@ void UCT::Run(){
                 
         double reward;        
         int action = Search(n, expParams.sims);        
-        
+                
         terminal = MDP->Step(s, action, reward); //Simulate step with action               
         
         undiscountedReturn += reward;
         discountedReturn += reward*discount;
         discount *= searchParams.discount;
                 
-        n = n->getSuccessor(action, s); //Transition to new node                
-        s.copy(n->getState());
-
         if(expParams.verbose >= 1){
             cout << "A: ";
             MDP->DisplayAction(action, cout);
@@ -348,26 +342,40 @@ void UCT::Run(){
             cout << endl;
         }
         
-        //Get successor node
-        /*Node * m = n->getSuccessor(action, s);
-        n->freeSuccessor(action, s); //Eliminate successor from list
-        cout << "Freed" << endl;
-        delete n; //Delete old tree
-        cout << "Deleted" << endl;
-        n = m; //continue planning with new node
-        if(!n->expanded()){            
-            expandNode(n); //Newly visited nodes get all successors added at once
-        }
-        s.copy(n->getState());*/        
+        n = n->getSuccessor(action, s); //Transition to new node
+        s.copy(n->getState()); //Update "world" state
+        
+        /*
+        if(!terminal){
+            Node * m = n->getSuccessor(action, s);
+            n->freeSuccessor(action, s); //Eliminate successor from list
+            cout << "Freed" << endl;
+            delete n; //Delete old tree
+            cout << "Deleted old root" << endl;
+            n = m; //continue planning with new node
+            
+            cout << "New root = " << n->getState() << endl;
+            
+            if(!n->expanded()){                
+                expandNode(n); //Newly visited nodes get all successors added at once
+                cout << "Expanded root" << endl;
+            }
+            cout << "Updating s" << endl;
+            s.copy(n->getState());
+            cout << "S: " << s << endl;
+        }*/
+        
+        if(expParams.verbose >= 2)
+            cout << "Step " << t <<" finished" << endl;
     }
     
-    delete Root;
+    delete Root; //Tree is deleted after each run.  No need to delete in destructor
     
     results.discountedReturn.push_back(discountedReturn);
     results.undiscountedReturn.push_back(undiscountedReturn);
     
-    if(t == expParams.numSteps) cout << "\tTerminated (reached step limit). ";
-    if(terminal) cout << "\tGoal reached. ";
+    if(t == expParams.numSteps) cout << "   Terminated (reached step limit). ";
+    if(terminal) cout << "   Goal reached. ";
 }
 
 /*
@@ -382,7 +390,7 @@ void UCT::MultiRun(){
         Run();
         auto stop = std::chrono::high_resolution_clock::now();
         
-        cout << "Disc. R. = " << results.discountedReturn[r] << ", Undisc. R. = " << results.undiscountedReturn[r] << endl;
+        cout << "(R = " << results.undiscountedReturn[r] << ", Disc. R. = " << results.discountedReturn[r] << ")" << endl;
         
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
         results.time.push_back(duration.count());
@@ -391,7 +399,7 @@ void UCT::MultiRun(){
 
 /*
  * Schedule a multi run for each no. of simulations specified
- * Also, collect and generate statistics, and print to outpufFile
+ * Also, collect and generate statistics, and print to outputFile
  */
 void UCT::Experiment(){
     double discMean, discStdErr, undiscMean, undiscStdErr, meanTime;
@@ -407,7 +415,7 @@ void UCT::Experiment(){
     for(int i=expParams.minSims; i <= expParams.maxSims; i++){
         expParams.sims = 1 << i; //2^i simulations
         
-        cout << "Using " << expParams.sims << " simulations. "<<endl;
+        //cout << "Using " << expParams.sims << " simulations. "<<endl;
         
         MultiRun();
         
@@ -435,4 +443,33 @@ void UCT::Experiment(){
     }
         
     outputFile.close();
+}
+
+/*
+ * Use specified maxSims to approximate the value and optimal action in every state
+ * 
+ * The deterministic policy is created by traversing *all* MDP states and will *not* scale to large problems.  It also negates the online and anytime properties of UCT.
+ */
+void UCT::Solve(){    
+    vector<State> states;
+    MDP->listStates(states);
+    
+    vector<int> actions;    
+    vector<int> bestActions;
+    
+    int nSims = 1 << expParams.maxSims; //2^(maxSims) simulations
+    
+    for(State& s : states){        
+        MDP->getActions(s, actions); //get actions from MDP
+        Root = new Node(s, actions); //Create tree root using state and actions
+
+        //Plan with UCT, select best action with UCB, and add to solution vector
+        bestActions.push_back( Search(Root, nSims) );
+        
+        delete Root;
+        actions.clear();
+    }
+    
+    cout << "Deterministic policy generated with " << nSims << " simulations per step:" << endl;
+    MDP->DisplayPolicy(states, bestActions, cout);
 }

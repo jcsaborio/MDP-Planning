@@ -31,6 +31,7 @@ namespace PARSER{
         int numSteps = 50;
         int runs = 1;
         int verbose = 1;
+        bool solve = false;
     };
     
     void parseCommandLine(char ** argv, int argc, COMMAND_LINE& cl){        
@@ -71,9 +72,13 @@ namespace PARSER{
                 cout << std::left << std::setw(20) << "--verbose";
                 cout << std::left << std::setw(100) << "Verbosity level (default = 1)" << endl;      
                 
+                cout << std::setw(3) << "";
+                cout << std::left << std::setw(20) << "--solve";
+                cout << std::left << std::setw(100) << "Generate deterministic policy using N simulations per step" << endl;
+                
                 exit(0);
             }
-                        
+            
             else if(param == "--inputFile")
                 cl.inputFile = value;
             else if(param == "--outputFile")
@@ -88,6 +93,10 @@ namespace PARSER{
                 cl.runs = stoi(value);
             else if(param == "--verbose")
                 cl.verbose = stoi(value);
+            else if(param == "--solve"){
+                cl.maxSims = stoi(value);
+                cl.solve = true;
+            }
             else
                 cout << "Unrecognized parameter \"" << param << "\"" << endl;
         }

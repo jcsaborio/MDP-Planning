@@ -109,7 +109,7 @@ class UCT{
     
     public:
         UCT(UCT_PARAMS& searchParams, EXP_PARAMS& expParams, Maze * maze);
-        ~UCT();
+        //~UCT();
         
         int Search(Node * n, int nsims); //Plan with UCT from node n, using nsims simulations
         int UCB(Node * n, bool greedy = false); //UCB action selection
@@ -122,6 +122,11 @@ class UCT{
         void Run(); //Run a single instance according to expParams
         void MultiRun(); //Run several instances according to expParams
         void Experiment(); //Coordinate and generate output for multiple instances according to expParams
+        
+        /*
+         * Generate complete policy by iterating over all states
+         */
+        void Solve();
 };
 
 #endif

@@ -1,0 +1,9 @@
+cols 7
+rows 7
+traps 10
+p_traps 0.9
+startR 3
+startC 0
+goalR 3
+goalC 3
+discount 0.99
